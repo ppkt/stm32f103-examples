@@ -4,3 +4,9 @@
 [submodule "device_lib"]
 	path = device_lib
 	url = git@github.com:ppkt/device_lib.git
+[submodule "blinky/device_lib"]
+	path = blinky/device_lib
+	url = git@github.com:ppkt/device_lib.git
+[submodule "blinky/common_lib"]
+	path = blinky/common_lib
+	url = git@github.com:ppkt/common_lib.git
