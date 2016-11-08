@@ -1,0 +1,7 @@
+# CMake related files
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+
+# build directory
+build/
