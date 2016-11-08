@@ -10,3 +10,6 @@
 [submodule "blinky/common_lib"]
 	path = blinky/common_lib
 	url = git@github.com:ppkt/common_lib.git
+[submodule "usart/common_lib"]
+	path = usart/common_lib
+	url = git@github.com:ppkt/common_lib.git
