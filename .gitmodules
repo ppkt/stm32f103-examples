@@ -13,3 +13,9 @@
 [submodule "usart/common_lib"]
 	path = usart/common_lib
 	url = git@github.com:ppkt/common_lib.git
+[submodule "ds18b20/common_lib"]
+	path = ds18b20/common_lib
+	url = git@github.com:ppkt/common_lib.git
+[submodule "ds18b20/device_lib"]
+	path = ds18b20/device_lib
+	url = git@github.com:ppkt/device_lib.git
