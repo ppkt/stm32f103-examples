@@ -19,3 +19,6 @@
 [submodule "ds18b20/device_lib"]
 	path = ds18b20/device_lib
 	url = git@github.com:ppkt/device_lib.git
+[submodule "blinky/libopencm3"]
+	path = blinky/libopencm3
+	url = https://github.com/libopencm3/libopencm3.git

@@ -1,29 +1,72 @@
-PROJECT(blinky)
+get_filename_component(PROJECT_NAME ${CMAKE_SOURCE_DIR} NAME)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-ENABLE_LANGUAGE(ASM)
+message(STATUS "Configuring project ${PROJECT_NAME}")
 
-FIND_PACKAGE(CMSIS REQUIRED)
-FIND_PACKAGE(StdPeriphLib REQUIRED)
+project(${PROJECT_NAME} C ASM)
+cmake_minimum_required(VERSION 3.1)
 
-INCLUDE_DIRECTORIES(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMSIS_INCLUDE_DIR}
-    ${StdPeriphLib_INCLUDE_DIR}
-)
+set(LIBOPENCM3_DIR ${CMAKE_SOURCE_DIR}/libopencm3)
 
-SET(PROJECT_SOURCES
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+
+set(STM32F1_FLAGS "-mcpu=cortex-m3 -mthumb -msoft-float")
+set(EXTRA_C_FLAGS "-std=c11 \
+-Os \
+-Wall \
+-Wextra \
+-Werror \
+-Wimplicit-function-declaration \
+-Wredundant-decls \
+-Wmissing-prototypes \
+-Wstrict-prototypes \
+-Wundef \
+-Wshadow \
+-fno-common \
+-ffunction-sections \
+-fdata-sections \
+-Wno-packed-bitfield-compat \
+${STM32F1_FLAGS}")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+-T ${LIBOPENCM3_DIR}/lib/stm32/f1/stm32f103xb.ld \
+-MD \
+--static \
+-g3 \
+-ggdb3 \
+-nostartfiles \
+-msoft-float \
+-lc \
+-lgcc \
+-lnosys \
+-Wl,--gc-sections")
+
+set(SOURCES
     main.c
     common_lib/utils.c
-    common_lib/interrupts.c
+    )
+
+add_definitions(-DSTM32F1)
+
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${LIBOPENCM3_DIR}/include
 )
 
-SET(STM32_LINKER_SCRIPT ${CMSIS_LINKER_SCRIPT})
+add_custom_target(libopencm3 make WORKING_DIRECTORY ${LIBOPENCM3_DIR})
+link_directories(${LIBOPENCM3_DIR}/lib)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+add_executable(${CMAKE_PROJECT_NAME}.elf ${SOURCES})
 
-ADD_EXECUTABLE(${CMAKE_PROJECT_NAME} ${PROJECT_SOURCES} ${CMSIS_STARTUP_SOURCE} ${CMSIS_SOURCES} ${StdPeriphLib_SOURCES})
+target_link_libraries(${CMAKE_PROJECT_NAME}.elf
+    opencm3_stm32f1)
 
-STM32_SET_TARGET_PROPERTIES(${CMAKE_PROJECT_NAME})
-#STM32_SET_HSE_VALUE(${CMAKE_PROJECT_NAME} 12000000)
-STM32_ADD_HEX_BIN_TARGETS(${CMAKE_PROJECT_NAME})
+add_custom_target(${CMAKE_PROJECT_NAME}.bin ALL
+    ${OBJCOPY} -Obinary ${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.bin
+    DEPENDS ${CMAKE_PROJECT_NAME}.elf)
+
+
+add_custom_target(upload
+    stat -c %s ${CMAKE_PROJECT_NAME}.bin &&
+    /home/ppkt/usr/bin/st-flash --reset write ${CMAKE_PROJECT_NAME}.bin 0x08000000
+    DEPENDS ${CMAKE_PROJECT_NAME}.bin)
